@@ -1,0 +1,274 @@
+---
+title: "quantmod()"
+author: "DIMAS RAMIREZ LUIS DANIEL"
+date: "12/6/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Un solo activo (una acción)
+
+__Media y varianza__
+
+Los precios de las accciones son variables aleatorias 
+
+En realidad en lo que debemos enfocarnos es en los renidmientos de las acciones. 
+
+$$R = \frac{VF - VI}{VI}$$
+
+```{r}
+library(quantmod)
+
+#addBBands <- Add Bollinger Bands to current chart 
+#addMA <- Add  Moving Average to chart 
+#attachSymbols <- Attach and Flush DDB 
+#chartSeries <- create financial charts, to make technical analysis.
+#getQuote <- Download current stock quote 
+#getSymbols <- load and manage data from multiple sources 
+#getSymbols.csv
+#saverCHart <- save chart to external file
+
+```
+```{r}
+getSymbols("BAC")
+
+head(BAC)
+```
+```{r}
+tail(BAC)
+```
+
+```{r}
+plot(Cl(BAC), col= 'black')
+```
+```{r}
+barChart(BAC)
+```
+```{r}
+getSymbols("GOOG")
+```
+```{r}
+barChart(GOOG)
+```
+```{r}
+candleChart(GOOG, type = "candlesticks", multi.col = TRUE, theme= 'white', subset= 'last 2 months')
+```
+```{r}
+chartSeries(GOOG)
+
+```
+
+
+# Wulfrano 
+
+```{r}
+getSymbols("AMZN")
+head(AMZN)
+```
+
+
+```{r}
+barChart(AMZN)
+```
+
+```{r}
+# SACANDO EL RENDIMIENTO 
+
+R <- as.numeric(AMZN$AMZN.Close["2021-06-08"]-as.numeric(AMZN$AMZN.Close["2007-01-03"]))/as.numeric(AMZN$AMZN.Close["2007-01-03"])
+R
+```
+```{r}
+# Rendimientos al cierre 
+
+Rd <- diff(AMZN$AMZN.Close)/AMZN$AMZN.Close["2007-01-03/2021-06-07"] #Aqui es igual la formula del rendimiento solo que utilizo la 
+###################################################################### función diff()
+
+barChart(Rd)
+```
+
+
+```{r}
+hist(as.numeric(Rd))
+```
+
+Tenemos los rendimientos de la acción de AMAZON y sabemos que es una variable aleatoria que se distribuye de forma normal
+
+## Calcular el rendimiento promedio diario de AMZN
+
+```{r}
+AmznRd <- mean(Rd, na.rm = TRUE )
+AmznVRd <- var(Rd, na.rm = TRUE )
+AmznSDRd <- sd(Rd, na.rm = TRUE )
+
+AmznRd
+AmznVRd
+AmznSDRd
+```
+```{r}
+AMZNra <- round(((AmznRd+1)^252-1)*100, 2)
+
+AMZNVola <- round((AmznSDRd*252^0.5)*100, 2)
+```
+
+
+
+```{r}
+getSymbols("TM")
+
+barChart(TM$TM.Close)
+
+```
+
+```{r}
+# Rendimientos al cierre 
+
+RdTM <- diff(TM$TM.Close)/TM$TM.Close["2007-01-03/2021-06-07"] #Aqui es igual la formula del rendimiento solo que utilizo la 
+###################################################################### función diff()
+
+barChart(RdTM)
+```
+
+```{r}
+hist(as.numeric(RdTM))
+```
+
+```{r}
+tmRd <- mean(RdTM, na.rm = TRUE )
+tmVRd <- var(RdTM, na.rm = TRUE )
+tmSDRd <- sd(RdTM, na.rm = TRUE )
+
+tmRd
+tmVRd
+tmSDRd
+```
+
+```{r}
+pnorm(0, tmRd, tmSDRd)
+
+length(tmRd[tmRd <= 0])/length(tmRd)
+
+tmRA <- round(((tmRd+1)^252-1)*100, 2)
+
+tmVola <- round((tmSDRd*252^0.5)*100, 2)
+```
+
+
+
+# Lunes 14-Junio-2021
+
+Para calcular la probabilidad de una variable aleatoria discreta 
+
+Recordad que el valor esperado o esperanza matemática no es más que la media o $\mu$
+
+$$E(\bar x_i) = \sum \bar x_i P(x_i)$$
+
+
+$$ R_i = \frac{Precio_f-Precio_i}{Precio_i}$$
+
+Recuerda que con las acciones trabajamos con su rendimiento. 
+
+$$R_i ~=N(\mu , \sigma ^2) $$
+$$E(R_i)= \sum R_i~~P(R_i) = \frac{\sum R_i}{n}$$
+$$\sigma ^2 = Var(R_i)= E(R_i - E(R_i))^2= \frac{\sum_{i=1}^N~~(R_i- \mu)^2}{N}$$
+
+$$VOLATILIDAD = \sigma = \sqrt{Var(R_i)}$$
+
+$W$ está definido como el capital inicial de mi portafolio. 
+
+Suponiendo que mi portafolio esta consitituido por la acción A y B. El valor esperado del rendimiento de mi portafolio queda definido como : $R_p$
+$$E(R_p)=E[w*E(R_B)+(1-w)E(R_B)]$$
+ 
+__La volatilidad del portafolio es tambíen conocido como el riesgo del portafolio__
+
+$$COV(x,y) = \sum X_iY_iP()$$
+
+Factor de correlación [-1,1]
+
+$$\gamma_{x,y} = \frac{COV(x_i,y_i)}{\sigma_{xi}\sigma_{yi}}$$
+
+PIDE QUE TE EXPLIQUE ESTO RODOLFO 
+
+
+## Analizando dos activos, CEMEX y BIMBO 
+
+```{r}
+tickers <- c("CEMEXCPO.MX", "BIMBOA.MX")
+
+getSymbols(tickers)
+
+names(BIMBOA.MX)
+
+barChart(BIMBOA.MX$BIMBOA.MX.Close)
+barChart(CEMEXCPO.MX$CEMEXCPO.MX.Close)
+```
+
+# Cálculo de rendimientos 
+
+```{r}
+R_b <- diff(BIMBOA.MX$BIMBOA.MX.Close)/BIMBOA.MX$BIMBOA.MX.Close["2007-01-02/2021-06-10"]
+barChart(R_b)
+
+R_c <- diff(CEMEXCPO.MX$CEMEXCPO.MX.Close)/CEMEXCPO.MX$CEMEXCPO.MX.Close["2007-01-02/2021-06-10"]
+barChart(R_c)
+```
+
+## Considerar una ventana de tresa años 
+
+```{r}
+R_b3 <- R_b["2018-06-10/2021_06-10"]
+```
+
+
+```{r}
+R_c3 <- R_c["2018-06-10/2021_06-10"]
+```
+
+## Valor esperado 
+
+```{r}
+ERB <- mean(R_b3)
+ERC <- mean(R_c3)
+
+ERB
+ERC
+
+#¿porque los promedios son tan pequeños?
+```
+
+## Varianzas y covarianzas 
+
+```{r}
+VRB <- var(R_b3) #vairanza de Bimbo
+VRC <- var(R_c3) #varianza de Cemex
+cov_BC <- cov(R_b3, R_c3) #covarianza de bimbo y cemex 
+```
+
+## Valor esperado del portafolio con w=0.5
+
+```{r}
+w <- seq(0,1, by=0.01)
+
+ER_p <-  w*ERB+(1-w)*ERC
+```
+
+## Cálculo de la varianza del portafolio y de su riesgo (Volatilidad = desviación estándar)
+
+```{r}
+VRp <- w^2*VRB+(1-w)^2*VRC+2*w*(1-w)*cov_BC #pedirle a Rudy bien esta formula 
+
+vola_p <- VRp^0.5
+
+plot(vola_p, ER_p) #que te explique bien la gráfica 
+```
+
+Valor esperado del portafolio 
+
+$$E(R_P)=WE(R_A)+(1-W)E(R_B)$$
+Varianza del portafolio 
+
+$$\sigma^2_P=W^2\sigma^2_A+(1-W)^2\sigma^2_B+2W(1-W)\gamma_{A,B}$$
+¿Esta formula esta bien? 
+
+
+
